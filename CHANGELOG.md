@@ -1,12 +1,16 @@
 # OpenMobileNetworkToolkit Changelog
-## Release [0.5]
+## Release [0.5] - 38c3
 
 ### Added
+- Option to set EPDG static address
+- build information are now also written to the logging framework
+- git hash is no shown and logged
 
 ### Changed
+- tm instance is now updated in favor of creating a new one if subscription does not match
 
 ### Fixed
-
+- crash of the quick view on some phones
 
 ## Release [0.4] - Stralsund
 
