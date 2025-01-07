@@ -129,7 +129,7 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
     implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'com.google.guava:guava:33.2.1-jre'
+    implementation 'com.google.guava:guava:33.4.0-jre'
     implementation 'androidx.concurrent:concurrent-futures:1.2.0'
     implementation 'androidx.activity:activity:1.9.3'
     implementation 'androidx.fragment:fragment:1.8.5'
