@@ -25,6 +25,7 @@ public class GlobalVars {
     public static final String SSRSRP = "SSRSRP";
     public static final String SSRSRQ = "SSRSRQ";
     public static final String SSSINR = "SSSINR";
+    public static final String INFLUX_WRITE_STATUS = "influxdb_write_status";
     private static GlobalVars instance;
     ImageView log_status;
     private DataProvider dp;
