@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="26dp"
             android:visibility="visible"
-            app:navigationIcon="@drawable/openmnt_logo_no_title"
+            app:navigationIcon="@drawable/openmnt_logo_symbol"
             app:title="OMNT"
             app:titleCentered="false"
             app:titleMargin="0dp"
