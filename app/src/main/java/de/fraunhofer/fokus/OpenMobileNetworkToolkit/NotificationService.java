@@ -130,6 +130,7 @@ public class NotificationService extends Service {
                     // prevent to swipe the notification away
                     .setOngoing(true);
         }
+        setupNotificationUpdate();
     }
     private StringBuilder getStringBuilder(){
         StringBuilder s = dp.getRegisteredCells().get(0).getStringBuilder();
@@ -146,6 +147,7 @@ public class NotificationService extends Service {
         @Override
         public void run() {
             updateNotification();
+            notificationHandler.postDelayed(servingCellNotificaiton, 1000);
 
         }
     };

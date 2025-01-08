@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
     public boolean cp = false;
     public boolean feature_telephony = false;
     Intent loggingServiceIntent;
+    Intent notificationServiceIntent;
     NavController navController;
     private Handler requestCellInfoUpdateHandler;
     private HandlerThread requestCellInfoUpdateHandlerThread;
@@ -214,13 +215,15 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
             }
         }, SPType.logging_sp);
 
+        notificationServiceIntent = new Intent(context, NotificationService.class);
+        if(spg.getSharedPreference(SPType.default_sp).getBoolean("enable_radio_notification", false)){
+            context.startService(notificationServiceIntent);
+        }
         spg.setListener((prefs, key) -> {
             if(Objects.equals(key, "enable_radio_notification")){
                 if(prefs.getBoolean(key, false)){
-                    Intent notificationServiceIntent = new Intent(context, NotificationService.class);
                     context.startService(notificationServiceIntent);
                 } else {
-                    Intent notificationServiceIntent = new Intent(context, NotificationService.class);
                     context.stopService(notificationServiceIntent);
                 }
             }
