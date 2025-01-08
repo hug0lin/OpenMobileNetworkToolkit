@@ -286,11 +286,25 @@ public class LoggingService extends Service {
 
 
 
+
         // create preferences listener
         spg.setListener((prefs, key) -> {
             if(Objects.equals(key, "enable_logging")) {
-                if (!prefs.getBoolean(key, false)) {
+                if (prefs.getBoolean(key, false)) {
                     Log.d(TAG, "onSharedPreferenceChanged: " + prefs.getBoolean(key, false));
+                    if(spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_influx", false)) {
+                        // enable influx when enable_logging is enabled
+                        setupRemoteInfluxDB();
+                    }
+                    if(spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_local_file_log", false)){
+                        // enable local file log when enable_logging is enabled
+                        setupLocalFile();
+                        updateNotification();
+                    }
+
+
+                } else {
+                    updateNotification();
                     this.onDestroy();
                 }
             } else
@@ -301,20 +315,34 @@ public class LoggingService extends Service {
                         Toast.makeText(getApplicationContext(), "Please fill all Influx Settings", Toast.LENGTH_LONG).show();
                         prefs.edit().putBoolean("enable_influx", false).apply();
                     } else {
-                        setupRemoteInfluxDB();
-                        updateNotification();
+                        if(spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_logging", false)) {
+                            // only enable influx log, when enable_logging is also enabled
+                            setupRemoteInfluxDB();
+                            updateNotification();
+                        }
+
                     }
                 } else {
-                    stopRemoteInfluxDB();
-                    updateNotification();
+                    if(spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_logging", false)) {
+                        // only stop influx log, when enable_logging is also enabled
+                        stopRemoteInfluxDB();
+                        updateNotification();
+                    }
+
                 }
             } else if (Objects.equals(key, "enable_local_file_log")) {
                 if (prefs.getBoolean(key, false)) {
-                    setupLocalFile();
-                    updateNotification();
+                    if(spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_logging", false)) {
+                        // only enable file log, when enable_logging is also enabled
+                        setupLocalFile();
+                        updateNotification();
+                    }
                 } else {
-                    stopLocalFile();
-                    updateNotification();
+                    if(spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_logging", false)) {
+                        // only stop file log, when enable_logging is also enabled
+                        stopLocalFile();
+                        updateNotification();
+                    }
                 }
             } else if (Objects.equals(key, "enable_local_influx_log")) {
                 if (prefs.getBoolean(key, false)) {

@@ -133,6 +133,8 @@ public class NotificationService extends Service {
         setupNotificationUpdate();
     }
     private StringBuilder getStringBuilder(){
+        if(dp == null) return new StringBuilder();
+        if(dp.getRegisteredCells() == null) return new StringBuilder();
         StringBuilder s = dp.getRegisteredCells().get(0).getStringBuilder();
         return s;
     }
