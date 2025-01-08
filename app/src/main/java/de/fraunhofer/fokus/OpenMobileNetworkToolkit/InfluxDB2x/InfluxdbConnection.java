@@ -244,15 +244,7 @@ public class InfluxdbConnection {
     }
 
     public boolean ping() {
-        boolean ping = false;
-        try {
-            ping = influxDBClient.ping();
-            influxDBClient.version();
-        } catch (Exception e) {
-            Log.e(TAG, "ping: Can't ping InfluxDB");
-            //Log.d(TAG, "ping: " + e.toString());
-        }
-        return ping;
+        return influxDBClient.ping();
     }
 }
 
