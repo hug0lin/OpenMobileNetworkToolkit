@@ -76,15 +76,12 @@ public class NotificationService extends Service {
         nm = getSystemService(NotificationManager.class);
         spg = SharedPreferencesGrouper.getInstance(this);
         spg.setListener((prefs, key) -> {
-            if (key.equals("enable_radio_notification")) {
-                if (prefs.getBoolean("enable_radio_notification", false)) {
-                    if (prefs.getBoolean(key, false)) {
-                        setupNotificationUpdate();
-                    } else {
-                        stopNotificationUpdate();
-                    }
-                }
+            if (prefs.getBoolean("enable_radio_notification", false)) {
+                setupNotificationUpdate();
+            } else {
+                stopNotificationUpdate();
             }
+
         }, SPType.default_sp);
         setupNotification();
         startForeground(4, builder.build());
