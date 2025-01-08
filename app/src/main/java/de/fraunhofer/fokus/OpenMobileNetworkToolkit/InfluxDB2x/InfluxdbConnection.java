@@ -56,12 +56,6 @@ public class InfluxdbConnection {
         spg = SharedPreferencesGrouper.getInstance(context);
     }
 
-    private void sendIntent(InfluxdbConnectionStatus influxdbConnectionStatus){
-        Intent broadcastIntent = new Intent(GlobalVars.INFLUX_WRITE_STATUS);
-        broadcastIntent.putExtra(GlobalVars.INFLUX_WRITE_STATUS, influxdbConnectionStatus);
-        this.c.sendBroadcast(broadcastIntent);
-    }
-
     /**
      * Open the write API on the InfluxConnection
      */
