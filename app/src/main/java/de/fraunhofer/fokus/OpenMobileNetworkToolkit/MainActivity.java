@@ -213,6 +213,19 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
                 }
             }
         }, SPType.logging_sp);
+
+        spg.setListener((prefs, key) -> {
+            if(Objects.equals(key, "enable_radio_notification")){
+                if(prefs.getBoolean(key, false)){
+                    Intent notificationServiceIntent = new Intent(context, NotificationService.class);
+                    context.startService(notificationServiceIntent);
+                } else {
+                    Intent notificationServiceIntent = new Intent(context, NotificationService.class);
+                    context.stopService(notificationServiceIntent);
+                }
+            }
+        }, SPType.default_sp);
+
         getAppSignature();
         gv.setGit_hash(getString(R.string.git_hash));
     }
