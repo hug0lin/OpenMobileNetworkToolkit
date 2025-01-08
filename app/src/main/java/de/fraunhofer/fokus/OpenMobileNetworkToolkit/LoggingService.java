@@ -308,10 +308,6 @@ public class LoggingService extends Service {
         interval = Integer.parseInt(spg.getSharedPreference(SPType.logging_sp).getString("logging_interval", "1000"));
 
 
-        setupNotification();
-        // Start foreground service and setup logging targets
-        startForeground(1, builder.build());
-        //getInfluxDBConnectionStatus();
 
         // create preferences listener
         spg.setListener((prefs, key) -> {
@@ -375,6 +371,12 @@ public class LoggingService extends Service {
         if (spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_local_influx_log", false)) {
             setupLocalFile();
         }
+
+        setupNotification();
+        // Start foreground service and setup logging targets
+        startForeground(1, builder.build());
+
+
         return START_STICKY;
     }
 
