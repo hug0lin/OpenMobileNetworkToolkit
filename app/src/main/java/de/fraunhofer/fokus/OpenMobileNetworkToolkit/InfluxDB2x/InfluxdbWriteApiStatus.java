@@ -2,9 +2,7 @@ package de.fraunhofer.fokus.OpenMobileNetworkToolkit.InfluxDB2x;
 
 import androidx.annotation.NonNull;
 
-import com.influxdb.client.write.events.WriteSuccessEvent;
-
-public enum InfluxdbConnectionStatus {
+public enum InfluxdbWriteApiStatus {
     Backpressure,
     WriteSuccess,
     WriteErrorEvent,
@@ -21,7 +19,7 @@ public enum InfluxdbConnectionStatus {
             default: return "Unknown";
         }
     }
-    public static InfluxdbConnectionStatus fromString(String str) {
+    public static InfluxdbWriteApiStatus fromString(String str) {
         str = str.toLowerCase();
         switch(str) {
             case "backpressure": return Backpressure;
@@ -33,7 +31,7 @@ public enum InfluxdbConnectionStatus {
         }
     }
 
-    public boolean isEquals(InfluxdbConnectionStatus status) {
+    public boolean isEquals(InfluxdbWriteApiStatus status) {
         return this==status;
     }
 }

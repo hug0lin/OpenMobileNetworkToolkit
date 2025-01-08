@@ -43,7 +43,6 @@ public class InfluxdbConnection {
     private InfluxDBClient influxDBClient;
     private WriteApi writeApi;
     private final GlobalVars gv;
-    private Context c;
 
     public InfluxdbConnection(String URL, String token, String org, String bucket,
                               Context context) {
@@ -52,7 +51,6 @@ public class InfluxdbConnection {
         this.gv = GlobalVars.getInstance();
         influxDBClient = InfluxDBClientFactory.create(this.url, token1, org, bucket);
         influxDBClient.enableGzip();
-        c = context;
         spg = SharedPreferencesGrouper.getInstance(context);
     }
 
@@ -241,14 +239,18 @@ public class InfluxdbConnection {
     public WriteApi getWriteApi() {
         return writeApi;
     }
+    public String getUrl() {
+        return this.url;
+    }
 
     public boolean ping() {
         boolean ping = false;
         try {
             ping = influxDBClient.ping();
+            influxDBClient.version();
         } catch (Exception e) {
             Log.e(TAG, "ping: Can't ping InfluxDB");
-            Log.d(TAG, "ping: " + e.toString());
+            //Log.d(TAG, "ping: " + e.toString());
         }
         return ping;
     }

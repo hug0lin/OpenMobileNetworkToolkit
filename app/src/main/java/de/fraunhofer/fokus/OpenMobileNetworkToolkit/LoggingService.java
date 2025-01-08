@@ -35,7 +35,6 @@ import com.influxdb.client.write.events.BackpressureEvent;
 import com.influxdb.client.write.events.WriteErrorEvent;
 import com.influxdb.client.write.events.WriteRetriableErrorEvent;
 import com.influxdb.client.write.events.WriteSuccessEvent;
-import com.influxdb.exceptions.NotFoundException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -53,7 +52,7 @@ import java.util.Objects;
 import de.fraunhofer.fokus.OpenMobileNetworkToolkit.DataProvider.DataProvider;
 import de.fraunhofer.fokus.OpenMobileNetworkToolkit.DataProvider.WifiInformation;
 import de.fraunhofer.fokus.OpenMobileNetworkToolkit.InfluxDB2x.InfluxdbConnection;
-import de.fraunhofer.fokus.OpenMobileNetworkToolkit.InfluxDB2x.InfluxdbConnectionStatus;
+import de.fraunhofer.fokus.OpenMobileNetworkToolkit.InfluxDB2x.InfluxdbWriteApiStatus;
 import de.fraunhofer.fokus.OpenMobileNetworkToolkit.InfluxDB2x.InfluxdbConnections;
 import de.fraunhofer.fokus.OpenMobileNetworkToolkit.Preferences.SPType;
 import de.fraunhofer.fokus.OpenMobileNetworkToolkit.Preferences.SharedPreferencesGrouper;
@@ -77,8 +76,9 @@ public class LoggingService extends Service {
     private List<Point> logFilePoints;
     private FileOutputStream stream;
     private int interval;
-    private InfluxdbConnectionStatus currentInfluxdbConnectionStatus = InfluxdbConnectionStatus.Unknown;
-    private String influxMessage = "";
+    private InfluxdbWriteApiStatus currentInfluxdbWriteApiStatus = InfluxdbWriteApiStatus.Unknown;
+    private boolean influxConnectionStatus = true;
+    private String currentInfluxDbWriteApiStatusMessage = "";
     GlobalVars gv;
     // Handle local on-device logging to logfile
     private final Runnable localFileUpdate = new Runnable() {
@@ -181,12 +181,30 @@ public class LoggingService extends Service {
         StringBuilder s = new StringBuilder();
         s.append("Logging to...\n");
         s.append("File: ").append(spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_local_file_log", false)).append("\n");
-        s.append("Influx: ").append(currentInfluxdbConnectionStatus).append("\n");
-        switch (currentInfluxdbConnectionStatus) {
+
+        if(ic == null) {
+            // influx not initialized
+            //s.append("InfluxDB: not connected\n");
+            return s;
+        }
+        s.append("InfluxDB: ");
+        if(!influxConnectionStatus){
+            //influx not reachable
+                s.append(ic.getUrl())
+                    .append(" not reachable\n");
+            return s;
+        } else {
+            //influx reachable, so showing the writeApi Status
+            s.append(currentInfluxdbWriteApiStatus).append("\n");
+        }
+
+
+
+        switch (currentInfluxdbWriteApiStatus) {
             case Backpressure:
             case WriteErrorEvent:
             case WriteRetriableErrorEvent:
-                s.append("\tReason: ").append(influxMessage).append("\n");
+                s.append("\tReason: ").append(currentInfluxDbWriteApiStatusMessage).append("\n");
                 break;
             case WriteSuccess:
             case Unknown:
@@ -237,48 +255,39 @@ public class LoggingService extends Service {
                 .bigText(s));
         nm.notify(1, builder.build());
     }
-
-
     private void getInfluxDBConnectionStatus() {
-        if(ic == null) return;
+        if (ic == null) return;
         WriteApi writeApi = ic.getWriteApi();
-        if(writeApi == null) return;
-        writeApi.listenEvents(BackpressureEvent.class, value -> {
-            influxMessage = value.getReason().toString();
-            Log.d(TAG, "getInfluxDBConnectionStatus: Could not write to InfluxDBv2 due to backpressure "+influxMessage);
-            if ( spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_influx", false)) {
-                if(currentInfluxdbConnectionStatus == InfluxdbConnectionStatus.Backpressure) return;
-                currentInfluxdbConnectionStatus = InfluxdbConnectionStatus.Backpressure;
-                updateNotification();
-            }
-        });
-        writeApi.listenEvents(WriteSuccessEvent.class, value -> {
-            //Log.d(TAG, "getInfluxDBConnectionStatus: Write to InfluxDBv2 was successful");
-            if ( spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_influx", false)) {
-                if(currentInfluxdbConnectionStatus == InfluxdbConnectionStatus.WriteSuccess) return;
-                currentInfluxdbConnectionStatus = InfluxdbConnectionStatus.WriteSuccess;
-                updateNotification();
-            }
-        });
-        writeApi.listenEvents(WriteErrorEvent.class, value -> {
-            influxMessage = value.getThrowable().getMessage();
-            Log.d(TAG, "getInfluxDBConnectionStatus: Could not write to InfluxDBv2 due to "+influxMessage);
-            if ( spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_influx", false)) {
-                if(currentInfluxdbConnectionStatus == InfluxdbConnectionStatus.WriteErrorEvent) return;
-                currentInfluxdbConnectionStatus = InfluxdbConnectionStatus.WriteErrorEvent;
-                updateNotification();
-            }
-        });
-        writeApi.listenEvents(WriteRetriableErrorEvent.class, value -> {
-            influxMessage = value.getThrowable().getMessage();
-            Log.d(TAG, "getInfluxDBConnectionStatus: Could not write to InfluxDBv2 due to retriable error "+influxMessage);
-            if ( spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_influx", false)) {
-                if(currentInfluxdbConnectionStatus == InfluxdbConnectionStatus.WriteRetriableErrorEvent) return;
-                currentInfluxdbConnectionStatus = InfluxdbConnectionStatus.WriteRetriableErrorEvent;
-                updateNotification();
-            }
-        });
+        if (writeApi == null) return;
 
+        // Listen for different WriteApi events
+        writeApi.listenEvents(BackpressureEvent.class, event ->
+                handleWriteApiEvent(InfluxdbWriteApiStatus.Backpressure, event.getReason().toString()));
+
+        writeApi.listenEvents(WriteSuccessEvent.class, event ->
+                handleWriteApiEvent(InfluxdbWriteApiStatus.WriteSuccess, null));
+
+        writeApi.listenEvents(WriteErrorEvent.class, event ->
+                handleWriteApiEvent(InfluxdbWriteApiStatus.WriteErrorEvent, event.getThrowable().getMessage()));
+
+        writeApi.listenEvents(WriteRetriableErrorEvent.class, event ->
+                handleWriteApiEvent(InfluxdbWriteApiStatus.WriteRetriableErrorEvent, event.getThrowable().getMessage()));
+    }
+
+    private void handleWriteApiEvent(InfluxdbWriteApiStatus status, String message) {
+        if (!spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_influx", false)) return;
+
+        // Check if status has changed
+        if (currentInfluxdbWriteApiStatus == status &&
+                (message == null || message.equals(currentInfluxDbWriteApiStatusMessage))) return;
+
+        // Update the status and log message
+        currentInfluxdbWriteApiStatus = status;
+        if (message != null) currentInfluxDbWriteApiStatusMessage = message;
+
+        Log.d(TAG, String.format("getInfluxDBConnectionStatus: Could not write to InfluxDBv2 due to %s %s", status.toString(), currentInfluxDbWriteApiStatusMessage));
+
+        updateNotification();
     }
 
 
@@ -346,8 +355,6 @@ public class LoggingService extends Service {
                 interval = Integer.parseInt(spg.getSharedPreference(SPType.logging_sp).getString("logging_interval", "1000"));
             }
         }, SPType.logging_sp);
-
-
 
         if (spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_notification_update", false)) {
             setupNotificationUpdate();
@@ -615,6 +622,20 @@ public class LoggingService extends Service {
         }
     }
 
+    Runnable monitorInfluxDBConnectionStatus = new Runnable() {
+        @Override
+        public void run() {
+            if (ic == null) return;
+            boolean newInfluxConnectionStatus = ic.ping();
+            Log.d(TAG, "run: monitorInfluxDBConnectionStatus: "+newInfluxConnectionStatus);
+            if(newInfluxConnectionStatus != influxConnectionStatus) {
+                influxConnectionStatus = newInfluxConnectionStatus;
+                updateNotification();
+            };
+            remoteInfluxHandler.postDelayed(this, interval);
+        }
+    };
+
     /**
      * initialize a new remote influxDB connection
      */
@@ -627,6 +648,7 @@ public class LoggingService extends Service {
         remoteInfluxHandlerThread.start();
         remoteInfluxHandler = new Handler(Objects.requireNonNull(remoteInfluxHandlerThread.getLooper()));
         remoteInfluxHandler.post(RemoteInfluxUpdate);
+        remoteInfluxHandler.post(monitorInfluxDBConnectionStatus);
         ImageView log_status = gv.getLog_status();
         if (log_status != null) {
             gv.getLog_status().setColorFilter(Color.argb(255, 255, 0, 0));
