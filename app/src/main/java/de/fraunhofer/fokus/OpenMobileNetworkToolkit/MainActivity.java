@@ -119,12 +119,12 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         // initialize android UX related thing the app needs
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("");
         setSupportActionBar(toolbar);
         gv.setLog_status(findViewById(R.id.log_status_icon));
 
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
         navController = Objects.requireNonNull(navHostFragment).getNavController();
+
         // create notification channel
         CharSequence name = getString(R.string.channel_name);
         String description = getString(R.string.channel_description);
