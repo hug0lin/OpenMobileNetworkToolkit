@@ -66,7 +66,9 @@
             android:foregroundServiceType="location" />
         <service android:name="de.fraunhofer.fokus.OpenMobileNetworkToolkit.Ping.PingService" />
 
-
+        <service
+            android:name="de.fraunhofer.fokus.OpenMobileNetworkToolkit.NotificationService"
+            android:foregroundServiceType="location" />
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="specialUse">
