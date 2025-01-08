@@ -180,11 +180,16 @@ public class LoggingService extends Service {
     private StringBuilder getStringBuilder() {
         StringBuilder s = new StringBuilder();
         s.append("Logging to...\n");
-        s.append("File: ").append(spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_local_file_log", false)).append("\n");
+
+        if(spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_local_file_log", false))
+            s.append("File\n");
 
         if(ic == null) {
             // influx not initialized
             //s.append("InfluxDB: not connected\n");
+            if(s.toString().equals("Logging to...\n")) {
+                s.append("No logging targets enabled\n");
+            }
             return s;
         }
         s.append("InfluxDB: ");
@@ -198,8 +203,6 @@ public class LoggingService extends Service {
             s.append(currentInfluxdbWriteApiStatus).append("\n");
         }
 
-
-
         switch (currentInfluxdbWriteApiStatus) {
             case Backpressure:
             case WriteErrorEvent:
@@ -211,6 +214,7 @@ public class LoggingService extends Service {
             default:
                 break;
         }
+
         return s;
     }
 
