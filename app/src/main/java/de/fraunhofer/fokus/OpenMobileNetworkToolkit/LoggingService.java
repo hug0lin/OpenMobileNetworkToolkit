@@ -65,8 +65,6 @@ public class LoggingService extends Service {
     InfluxdbConnection lic; // local influxDB
     DataProvider dp;
     SharedPreferencesGrouper spg;
-    private Handler notificationHandler;
-    private HandlerThread notificationHandlerThread;
     private Handler remoteInfluxHandler;
     private HandlerThread remoteInfluxHandlerThread;
     private Handler localInfluxHandler;
@@ -101,27 +99,6 @@ public class LoggingService extends Service {
                 }
             }
             localFileHandler.postDelayed(this, interval);
-        }
-    };
-    // Handle notification bar update
-    private final Runnable notification_updater = new Runnable() {
-        @SuppressLint("ObsoleteSdkInt")
-        @Override
-        public void run() {
-            if(dp == null) {
-                Log.e(TAG, "run: Data provider is null!");
-                return;
-            }
-            //StringBuilder s = dp.getRegisteredCells().get(0).getStringBuilder();
-            StringBuilder s = new StringBuilder();
-
-            s.append("File: ").append(spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_local_file_log", false)).append("\n");
-            s.append("Influx: ").append("TBD").append("\n");
-
-
-            builder.setContentText(s);
-            nm.notify(1, builder.build());
-            notificationHandler.postDelayed(this, interval);
         }
     };
 
@@ -331,12 +308,6 @@ public class LoggingService extends Service {
                     stopRemoteInfluxDB();
                     updateNotification();
                 }
-            } else if (Objects.equals(key, "enable_notification_update")) {
-                if (prefs.getBoolean(key, false)) {
-                    setupNotificationUpdate();
-                } else {
-                    stopNotificationUpdate();
-                }
             } else if (Objects.equals(key, "enable_local_file_log")) {
                 if (prefs.getBoolean(key, false)) {
                     setupLocalFile();
@@ -355,10 +326,6 @@ public class LoggingService extends Service {
                 interval = Integer.parseInt(spg.getSharedPreference(SPType.logging_sp).getString("logging_interval", "1000"));
             }
         }, SPType.logging_sp);
-
-        if (spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_notification_update", false)) {
-            setupNotificationUpdate();
-        }
 
         if (spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_influx", false)) {
             setupRemoteInfluxDB();
@@ -569,31 +536,6 @@ public class LoggingService extends Service {
         }
     }
 
-    private void setupNotificationUpdate() {
-        Log.d(TAG, "setupNotificationUpdate");
-        notificationHandlerThread = new HandlerThread("NotificationHandlerThread");
-        notificationHandlerThread.start();
-        notificationHandler = new Handler(Objects.requireNonNull(notificationHandlerThread.getLooper()));
-        notificationHandler.post(notification_updater);
-    }
-
-    private void stopNotificationUpdate() {
-        Log.d(TAG, "stopNotificationUpdate");
-        notificationHandler.removeCallbacks(notification_updater);
-        //builder.setContentText(null);
-        //nm.notify(1, builder.build());
-        nm.cancel(1);
-
-        if (notificationHandlerThread != null) {
-            notificationHandlerThread.quitSafely();
-            try {
-                notificationHandlerThread.join();
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Exception happened!! "+e, e);
-            }
-            notificationHandlerThread = null;
-        }
-    }
 
     private void setupLocalInfluxDB() {
         Log.d(TAG, "setupLocalInfluxDB");
