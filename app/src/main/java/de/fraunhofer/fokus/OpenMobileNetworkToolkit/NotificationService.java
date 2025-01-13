@@ -107,13 +107,14 @@ public class NotificationService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             // create notification
             builder = new NotificationCompat.Builder(this, "OMNT_notification_channel")
-                    .setContentTitle(getText(R.string.cell_notifcation))
+                    //.setContentTitle(getText(R.string.cell_notifcation))
                     .setSmallIcon(R.mipmap.ic_launcher_foreground)
                     .setColor(Color.WHITE)
                     .setContentIntent(pendingIntent)
                     // prevent to swipe the notification away
                     .setOngoing(true)
                     .setOnlyAlertOnce(true)
+                    .setContentText(getText(R.string.cell_notifcation))
                     .setStyle(new NotificationCompat.BigTextStyle()
                             .bigText(s))
                     // don't wait 10 seconds to show the notification
@@ -121,7 +122,7 @@ public class NotificationService extends Service {
         } else {
             // create notification
             builder = new NotificationCompat.Builder(this, "OMNT_notification_channel")
-                    .setContentTitle(getText(R.string.cell_notifcation))
+                    //.setContentTitle(getText(R.string.cell_notifcation))
                     .setSmallIcon(R.mipmap.ic_launcher_foreground)
                     .setColor(Color.WHITE)
                     .setContentIntent(pendingIntent)
@@ -134,9 +135,17 @@ public class NotificationService extends Service {
         setupNotificationUpdate();
     }
     private StringBuilder getStringBuilder(){
-        if(dp == null) return new StringBuilder();
-        if(dp.getRegisteredCells() == null) return new StringBuilder();
-        StringBuilder s = dp.getRegisteredCells().get(0).getStringBuilder();
+        StringBuilder s = new StringBuilder();
+        s.append(getText(R.string.cell_notifcation)).append("\n");
+        if(dp == null) return s;
+        if(dp.getRegisteredCells() == null) return s;
+        try {
+            s = s.append(dp.getRegisteredCells().get(0).getStringBuilder());
+        } catch (IndexOutOfBoundsException e) {
+            Log.e(TAG, "getStringBuilder: IndexOutOfBoundsException");
+            Log.d(TAG, "getStringBuilder: "+e);
+        }
+
         return s;
     }
     private void updateNotification(){

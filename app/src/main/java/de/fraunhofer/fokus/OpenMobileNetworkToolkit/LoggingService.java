@@ -156,6 +156,7 @@ public class LoggingService extends Service {
 
     private StringBuilder getStringBuilder() {
         StringBuilder s = new StringBuilder();
+        s.append(getText(R.string.loggin_notifaction)).append("\n");
         s.append("Logging to...\n");
 
         if(spg.getSharedPreference(SPType.logging_sp).getBoolean("enable_local_file_log", false))
@@ -204,13 +205,13 @@ public class LoggingService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             // create notification
             builder = new NotificationCompat.Builder(this, "OMNT_notification_channel")
-                    .setContentTitle(getText(R.string.loggin_notifaction))
                     .setSmallIcon(R.mipmap.ic_launcher_foreground)
                     .setColor(Color.WHITE)
                     .setContentIntent(pendingIntent)
                     // prevent to swipe the notification away
                     .setOngoing(true)
                     .setOnlyAlertOnce(true)
+                    .setContentText(getText(R.string.loggin_notifaction))
                     .setStyle(new NotificationCompat.BigTextStyle()
                             .bigText(s))
                     // don't wait 10 seconds to show the notification
@@ -218,11 +219,11 @@ public class LoggingService extends Service {
         } else {
             // create notification
             builder = new NotificationCompat.Builder(this, "OMNT_notification_channel")
-                    .setContentTitle(getText(R.string.loggin_notifaction))
                     .setSmallIcon(R.mipmap.ic_launcher_foreground)
                     .setColor(Color.WHITE)
                     .setContentIntent(pendingIntent)
                     .setOnlyAlertOnce(true)
+                    .setContentText(getText(R.string.loggin_notifaction))
                     .setStyle(new NotificationCompat.BigTextStyle()
                             .bigText(s))
                     // prevent to swipe the notification away
