@@ -122,7 +122,6 @@ public class NotificationService extends Service {
         } else {
             // create notification
             builder = new NotificationCompat.Builder(this, "OMNT_notification_channel")
-                    //.setContentTitle(getText(R.string.cell_notifcation))
                     .setSmallIcon(R.mipmap.ic_launcher_foreground)
                     .setColor(Color.WHITE)
                     .setContentIntent(pendingIntent)
@@ -152,6 +151,7 @@ public class NotificationService extends Service {
         StringBuilder s = getStringBuilder();
         builder.setStyle(new NotificationCompat.BigTextStyle()
                 .bigText(s));
+        builder.setContentText(getText(R.string.cell_notifcation));
         nm.notify(4, builder.build());
     }
 

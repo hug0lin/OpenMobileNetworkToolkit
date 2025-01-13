@@ -235,6 +235,7 @@ public class LoggingService extends Service {
         StringBuilder s = getStringBuilder();
         builder.setStyle(new NotificationCompat.BigTextStyle()
                 .bigText(s));
+        builder.setContentText(getText(R.string.loggin_notifaction));
         nm.notify(1, builder.build());
     }
     private void getInfluxDBConnectionStatus() {
