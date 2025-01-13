@@ -43,6 +43,7 @@ import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.preference.Preference;
@@ -117,6 +118,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         gv.setFeature_telephony(feature_telephony);
 
         // initialize android UX related thing the app needs
+        WindowCompat.setDecorFitsSystemWindows(this.getWindow(), false);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
