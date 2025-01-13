@@ -53,9 +53,6 @@ public class NotificationService extends Service {
     private void stopNotificationUpdate() {
         Log.d(TAG, "stopNotificationUpdate");
         notificationHandler.removeCallbacks(servingCellNotificaiton);
-        //builder.setContentText(null);
-        //nm.notify(1, builder.build());
-        nm.cancel(4);
 
         if (notificationHandlerThread != null) {
             notificationHandlerThread.quitSafely();
@@ -66,6 +63,12 @@ public class NotificationService extends Service {
             }
             notificationHandlerThread = null;
         }
+
+
+        stopForeground(STOP_FOREGROUND_DETACH);
+        builder.setContentText(null);
+        nm.cancel(4);
+
         onDestroy();
     }
 
@@ -92,6 +95,7 @@ public class NotificationService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopSelf();
     }
 
     private void setupNotification() {
