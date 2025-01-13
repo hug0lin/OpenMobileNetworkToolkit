@@ -210,6 +210,8 @@ public class LoggingService extends Service {
                     .setContentIntent(pendingIntent)
                     // prevent to swipe the notification away
                     .setOngoing(true)
+                    .setShowWhen(false)
+
                     .setOnlyAlertOnce(true)
                     .setContentText(getText(R.string.loggin_notifaction))
                     .setStyle(new NotificationCompat.BigTextStyle()
@@ -223,6 +225,8 @@ public class LoggingService extends Service {
                     .setColor(Color.WHITE)
                     .setContentIntent(pendingIntent)
                     .setOnlyAlertOnce(true)
+                    .setShowWhen(false)
+
                     .setContentText(getText(R.string.loggin_notifaction))
                     .setStyle(new NotificationCompat.BigTextStyle()
                             .bigText(s))

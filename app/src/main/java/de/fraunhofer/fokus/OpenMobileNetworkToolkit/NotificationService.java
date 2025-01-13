@@ -115,6 +115,7 @@ public class NotificationService extends Service {
                     .setOngoing(true)
                     .setOnlyAlertOnce(true)
                     .setContentText(getText(R.string.cell_notifcation))
+                    .setShowWhen(false)
                     .setStyle(new NotificationCompat.BigTextStyle()
                             .bigText(s))
                     // don't wait 10 seconds to show the notification
@@ -126,6 +127,7 @@ public class NotificationService extends Service {
                     .setColor(Color.WHITE)
                     .setContentIntent(pendingIntent)
                     .setOnlyAlertOnce(true)
+                    .setShowWhen(false)
                     .setStyle(new NotificationCompat.BigTextStyle()
                             .bigText(s))
                     // prevent to swipe the notification away
